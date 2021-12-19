@@ -1,6 +1,6 @@
 import mongodb from "mongodb"
 
-//DAO = Data Access Object
+//DAO = Data Access Object.
 
 // convert string to mongoDB obj(A class representation of the BSON ObjectId type.)
 const ObjectId = mongodb.ObjectId
