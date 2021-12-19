@@ -2,6 +2,15 @@ import ReviewsDAO from "../dao/reviewsDAO.js"
 
 export default class ReviewsController {
 
+  static async apiGetAllReviews(req, res, next) {
+    try {
+      const reviewsCollection = await ReviewsDAO.getAllReviews()
+      res.json(reviewsCollection)
+    } catch (e) {
+      res.status(500).json({ error: e.message })
+    }
+  }
+
   static async apiPostReview(req, res, next) {
     try {
       const restaurantId = req.body.restaurant_id
@@ -11,7 +20,7 @@ export default class ReviewsController {
         _id: req.body.user_id
       }
       const date = new Date()
-      const ReviewResponse = await ReviewsDAO.addReview(
+      const reviewResponse = await ReviewsDAO.addReview(
         restaurantId,
         userInfo,
         review,
@@ -27,26 +36,26 @@ export default class ReviewsController {
     try {
       const reviewId = req.body.review_id
       const text = req.body.text
+      const userId = req.body.user_id
       const date = new Date()
-      const reviewResponse = await ReviewsDAO.updateReview(
+      const reviewUpdateResponse = await ReviewsDAO.updateReview(
         reviewId,
-        req.body.user_id,
+        userId,
         text,
         date,
       )
-      //FIXME: why var???
-      var { error } = reviewResponse
+      let { error } = reviewUpdateResponse
       if (error) {
         res.status(400).json({ error })
       }
 
-      //TODO: where is .modifiedCount come form?
-      // review was not updated ?
-      if (reviewResponse.modifiedCount === 0) {
+      //if review was not updated
+      if (reviewUpdateResponse.modifiedCount === 0) {
         throw new Error(
           "Unable to update review, user may not be an author of this review  "
         )
       }
+      res.status(200).json({ status: "updated successfully" })
     } catch (e) {
       res.status(500).json({ error: e.message })
     }
@@ -56,12 +65,15 @@ export default class ReviewsController {
     try {
       const reviewId = req.query.id
       const userId = req.body.user_id
-      const reviewResponse = await ReviewsDAO.deleteReview(
+      const reviewDeleteResponse = await ReviewsDAO.deleteReview(
         // simple authentication (reviewId === userId)
         reviewId,
         userId,
       )
-      res.json({ status: "success" })
+      if (reviewDeleteResponse.deletedCount === 0) {
+        throw new Error("No document with this id")
+      }
+      res.json({ status: "deleted successfully" })
     } catch (e) {
       res.status(500).json({ error: e.message })
     }

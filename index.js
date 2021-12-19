@@ -22,17 +22,19 @@ MongoClient.connect(
     wtimeoutMS: 2500,
     useNewUrlParser: true
   }
-).catch(err => {
-  console.error(err.stack)
-  process.exit(1)
-}).then(async client => {
-  //get initial ref to ref collection in DB
-  await RestaurantsDAO.injectDB(client)
-  await ReviewsDAO.injectDB(client)
-  //start server
-  app.listen(port, () => {
-    console.log(`Serve at http://localhost:${port}/api/v1/restaurants`)
+)
+  .catch(err => {
+    console.error(err.stack)
+    process.exit(1)
   })
-})
+  .then(async client => {
+    //get initial ref to ref collection in DB
+    await RestaurantsDAO.injectDB(client)
+    await ReviewsDAO.injectDB(client)
+    //start server
+    app.listen(port, () => {
+      console.log(`Serve at http://localhost:${port}/api/v1/restaurants`)
+    })
+  })
 
   // end 30:00
